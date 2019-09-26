@@ -142,7 +142,10 @@ export default {
       this.getSensor()
     },
     changeTree (data, num) {
-      data.children.forEach((al) => {
+      var indexOne = ''
+      var indexValue = ''
+      data.children.forEach((al, ind) => {
+        al.name = al.nodename
         // if (cl.status === '0') {
         //   cl.lineStyle = {
         //     type: 'dashed'
@@ -150,28 +153,29 @@ export default {
         // }
         // if (cl.children){
         //   cl.children.forEach((al) => {
-        //     if (al.status === '0') {
-        //       al.lineStyle = {
-        //         type: 'dashed'
-        //       }
-        //     }
-            if (al.children){
-              var indexValue = ''
+            if (al.status === '0') {
+              al.lineStyle = {
+                type: 'dashed'
+              }
+            }
+            if (al.children && al.children.length > 0){
               al.children.forEach((bl, index) => {
+                bl.name = bl.nodename
                 if (bl.status === '0') {
                   bl.lineStyle = {
                     type: 'dashed'
                   }
                 }
-                if (bl.children) {
+                if (bl.children && bl.children.length > 0) {
+                  if (indexOne === '') {
+                    indexOne = ind
+                  }
                   if (indexValue === '') {
                     indexValue = index
                   }
                   bl.children.forEach((el) => {
-                    el.zxNum = 10
-                    el.zsNum = 5
                     if (!num) {
-                      el.name = el.name + ' ' + el.zxNum + '/' + el.zsNum
+                      el.name = el.SENSORTYPENAME + ' ' + el.NUM + '/' + 0
                     }
                     el.itemStyle = {
                       color: '#0069ac'
@@ -181,11 +185,11 @@ export default {
                     }
                   })
                   if (!num) {
-                    data.children[0].children[indexValue].children[0].itemStyle = {
+                    data.children[indexOne].children[indexValue].children[0].itemStyle = {
                       color: '#ed9b12'
                     }
-                    this.type = al.children[indexValue].children[0].sensorType
-                    this.sensorCode = al.children[indexValue].children[0].nodeCode
+                    this.type = data.children[indexOne].children[indexValue].children[0].SENSORTYPE
+                    // this.sensorCode = al.children[indexValue].children[0].nodeCode
                   }
                 }
               })
@@ -209,7 +213,7 @@ export default {
     parent 父级
     * */
     initData (data, ind) {
-      if (data.children) {
+      if (data.children && data.children.length > 0) {
         data.children.forEach((el, index) => {
           var level = ind + ',' + index
           el.level = level
@@ -219,7 +223,7 @@ export default {
     },
     clickFun (params) {
       var index = params.data.level
-      this.type = params.data.sensorType
+      this.type = params.data.SENSORTYPE
       this.sensorCode = params.data.nodeCode
       this.changeTree(this.data[0],index)
       this.initTree()
@@ -278,20 +282,24 @@ export default {
     },
     getData () {
       mylib.axios({
-        url: '/app/topology/pandect',
-        type: 'post',
+        url: '/app/visual/topology',
+        type: 'get',
         done (res) {
           if (res.code === 0) {
             this.deviceNum = res.deviceNum
             this.sensorNum = res.sensorNum
             this.sensorOnlineNum = res.sensorOnlineNum
             this.agsNodenum = res.agsNodenum
-            this.data = res.rows
+            var arr = [{
+              name: '平台',
+              children: res.rows
+            }]
+            this.data = arr
             if (this.data.length > 0) {
               this.data[0].level = 0
-              // this.initData(this.data[0])
-              // this.changeTree(this.data[0])
-              // this.initTree()
+              this.initData(this.data[0], '0')
+              this.changeTree(this.data[0])
+              this.initTree()
             }
           }
         }
@@ -300,37 +308,37 @@ export default {
   },
   mounted () {
     this.getData()
-    this.data = [{
-      "name": "平台",
-      "children": [
-        {
-          "name": "石家庄220kV子龙站(GIS)",
-          "children": [
-            {
-              "name": "汇聚节点",
-              "children": [
-                {"name": "温度传感器", "value": 10, sensorType: '温度传感器', nodeCode: '123'}
-              ]
-            }
-          ]
-        },
-        {
-          "name": "保定110kV下河西站(AIS)",
-          "children": [
-            {
-              "name": "汇聚节点",
-              "children": [
-                {"name": "温度传感器", "value": 10, sensorType: '温度传感器', nodeCode: '124'}
-              ]
-            }
-          ]
-        }
-      ]
-    }]
-    this.data[0].level = 0
-    this.initData(this.data[0], '0')
-    this.changeTree(this.data[0])
-    this.initTree()
+    // this.data = [{
+    //   "name": "平台",
+    //   "children": [
+    //     {
+    //       "name": "石家庄220kV子龙站(GIS)",
+    //       "children": [
+    //         {
+    //           "name": "汇聚节点",
+    //           "children": [
+    //             {"name": "温度传感器", "value": 10, sensorType: '温度传感器', nodeCode: '123'}
+    //           ]
+    //         }
+    //       ]
+    //     },
+    //     {
+    //       "name": "保定110kV下河西站(AIS)",
+    //       "children": [
+    //         {
+    //           "name": "汇聚节点",
+    //           "children": [
+    //             {"name": "温度传感器", "value": 10, sensorType: '温度传感器', nodeCode: '124'}
+    //           ]
+    //         }
+    //       ]
+    //     }
+    //   ]
+    // }]
+    // this.data[0].level = 0
+    // this.initData(this.data[0], '0')
+    // this.changeTree(this.data[0])
+    // this.initTree()
   },
   created () {
   }

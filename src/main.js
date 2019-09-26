@@ -5,6 +5,8 @@ import App from './App'
 import router from './router'
 import ECharts from 'vue-echarts/components/ECharts'
 Vue.prototype.$echarts = ECharts
+// import echartsGL from 'echarts-gl' // 引入echarts
+// Vue.prototype.$echartsGL = echartsGL
 
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'

@@ -4,7 +4,7 @@
       <div class="second">
         <div class="title"><span class="left-border"></span>变电站设备情况统计
           <div class="total-number">
-            2个站
+            {{total}}个站
           </div>
         </div>
       </div>
@@ -103,7 +103,8 @@
         startTime: '',
         endTime: '',
         show: false,
-        height: null
+        height: null,
+        total: 0
       }
     },
     methods: {
@@ -116,35 +117,45 @@
         this.show = false
         this.select = active
         this.custom = value
-        this.getBottom()
+        this.getData()
       },
       handleTime () {
         if (this.endTime && this.startTime && this.endTime <= this.startTime) {
           return this.$message.warning('结束时间在开始时间之前！')
         }
         if (this.endTime && this.startTime) {
-          this.getBottom()
+          this.getData()
         }
       },
-      getSensor () {
-        var name = ['温度传感器', '湿度传感器']
-        // var data1 = []
-        // data.forEach((el) => {
-        //   name.push(el.sensorTypeName)
-        //   data1.push(el.sensorNum)
-        // })
+      getSensor (data) {
+        var name = []
+        var data1 = []
+        data[0].date.forEach((al) => {
+          name.push(al.sensorTypeName)
+        })
+        data.forEach((el) => {
+          var arr = []
+          el.date.forEach((al) => {
+            arr.push(al.sensornum)
+          })
+          data1.push({
+            type: 'bar',
+            name: el.acsname,
+            barWidth: 30,
+            data: arr
+          })
+        })
         this.myChart = {
           title: {
           },
           tooltip: {},
           legend: {
-            data:['石家庄220kV子龙站(GIS)','保定110kV下河西站(AIS)']
           },
           grid: {
             top:'27px',
             left: '0',
             right: '0',
-            bottom: '0',
+            bottom: '5px',
             containLabel: true
           },
           xAxis: {
@@ -161,44 +172,37 @@
               }
             }
           }],
-          series: [{
-            type: 'bar',
-            name: '石家庄220kV子龙站(GIS)',
-            itemStyle: {
-              color: '#41d0cd'
-            },
-            barWidth: 30,
-            data: [200, 300]
-          }, {
-            type: 'bar',
-            name: '保定110kV下河西站(AIS)',
-            itemStyle: {
-              color: '#ff8a00'
-            },
-            barWidth: 30,
-            data: [300, 400]
-          }]
+          series: data1
         }
       },
-      getSensor1 () {
-        var name = ['温度传感器', '湿度传感器']
-        // var data1 = []
-        // data.forEach((el) => {
-        //   name.push(el.sensorTypeName)
-        //   data1.push(el.sensorNum)
-        // })
+      getSensor1 (data) {
+        var name = []
+        var data1 = []
+        data[0].date.forEach((al) => {
+          name.push(al.sensorTypeName)
+        })
+        data.forEach((el) => {
+          var arr = []
+          el.date.forEach((al) => {
+            arr.push(al.totalnum)
+          })
+          data1.push({
+            type: 'bar',
+            name: el.acsname,
+            barWidth: 30,
+            data: arr
+          })
+        })
         this.myChart1 = {
           title: {
           },
           tooltip: {},
-          legend: {
-            data:['石家庄220kV子龙站(GIS)','保定110kV下河西站(AIS)']
-          },
+          legend: {},
           grid: {
             top:'27px',
             left: '0',
             right: '0',
-            bottom: '0',
+            bottom: '5px',
             containLabel: true
           },
           xAxis: {
@@ -215,43 +219,35 @@
               }
             }
           }],
-          series: [{
-            type: 'bar',
-            name: '石家庄220kV子龙站(GIS)',
-            itemStyle: {
-              color: '#41d0cd'
-            },
-            barWidth: 30,
-            data: [200, 300]
-          }, {
-            type: 'bar',
-            name: '保定110kV下河西站(AIS)',
-            itemStyle: {
-              color: '#ff8a00'
-            },
-            barWidth: 30,
-            data: [300, 400]
-          }]
+          series: data1
         }
       },
-      getSensor2 () {
-        var name = ['设备告警', 'APP告警', '网络告警']
-        // var data1 = []
-        // data.forEach((el) => {
-        //   data1.push(el.sensorNum)
-        // })
+      getSensor2 (data) {
+        var name = ['协议告警', '设备告警', 'app告警']
+        var data1 = []
+        data.forEach((el) => {
+          var arr = []
+          el.date.forEach((al) => {
+            arr.push(al.dlnum)
+          })
+          data1.push({
+            type: 'bar',
+            name: el.acsname,
+            barWidth: 30,
+            data: arr
+          })
+        })
         this.myChart2 = {
           title: {
           },
           tooltip: {},
           legend: {
-            data:['石家庄220kV子龙站(GIS)','保定110kV下河西站(AIS)']
           },
           grid: {
             top:'27px',
             left: '0',
             right: '0',
-            bottom: '0',
+            bottom: '5px',
             containLabel: true
           },
           xAxis: {
@@ -268,31 +264,24 @@
               }
             }
           }],
-          series: [{
-            type: 'bar',
-            name: '石家庄220kV子龙站(GIS)',
-            itemStyle: {
-              color: '#41d0cd'
-            },
-            barWidth: 30,
-            data: [300, 400, 500]
-          }, {
-            type: 'bar',
-            name: '保定110kV下河西站(AIS)',
-            itemStyle: {
-              color: '#ff8a00'
-            },
-            barWidth: 30,
-            data: [300, 400, 500]
-          }]
+          series: data1
         }
       },
-      getSensor3 () {
-        var name = ['开关柜', '主变', '压变']
-        // var data1 = []
-        // data.forEach((el) => {
-        //   data1.push(el.sensorNum)
-        // })
+      getSensor3 (data) {
+        var name = ['温度', '湿度', '形变', '水浸']
+        var data1 = []
+        data.forEach((el) => {
+          var arr = []
+          el.date.forEach((al) => {
+            arr.push(al.zlnum)
+          })
+          data1.push({
+            type: 'bar',
+            name: el.acsname,
+            barWidth: 30,
+            data: arr
+          })
+        })
         this.myChart3 = {
           title: {
           },
@@ -303,7 +292,7 @@
             top:'27px',
             left: '0',
             right: '0',
-            bottom: '0',
+            bottom: '5px',
             containLabel: true
           },
           xAxis: {
@@ -320,68 +309,32 @@
               }
             }
           }],
-          series: [{
-            type: 'bar',
-            name: '石家庄220kV子龙站(GIS)',
-            itemStyle: {
-              color: '#41d0cd'
-            },
-            barWidth: 30,
-            data: [300, 400, 500]
-          }, {
-            type: 'bar',
-            name: '保定110kV下河西站(AIS)',
-            itemStyle: {
-              color: '#ff8a00'
-            },
-            barWidth: 30,
-            data: [300, 400, 500]
-          }]
+          series: data1
         }
       },
       getData () {
         mylib.axios({
-          url: '/app/topology/overview',
+          url: '/app/visual/pandect',
           type: 'post',
+          params: {
+            custom: this.custom,
+            startTime: this.startTime,
+            endTime: this.endTime
+          },
           done (res) {
             if (res.code === 0) {
-              this.deviceNum = res.deviceNum
-              this.sensorNum = res.sensorNum
-              this.sensorOnlineNum = res.sensorOnlineNum
-              this.agsNodenum = res.agsNodenum
-              // this.getSensor(res.sensorgraph)
-              // this.getSensor1(res.sensorgraph)
-              // this.getSensor2(res.sensorgraph)
-              // this.getSensor3(res.sensorgraph)
+              this.total = res.LXZB.length || res.ZXL.length || res.GJDL.length || res.GJZL.length
+              this.getSensor(res.LXZB)
+              this.getSensor1(res.ZXL)
+              this.getSensor2(res.GJDL)
+              this.getSensor3(res.GJZL)
             }
           }
         }, this)
-      },
-      // getBottom () {
-      //   mylib.axios({
-      //     url: '/app/topology/lodview',
-      //     type: 'post',
-      //     params: {
-      //       custom: this.custom,
-      //       startTime: this.startTime,
-      //       endTime: this.endTime
-      //     },
-      //     done (res) {
-      //       if (res.code === 0) {
-      //         this.getSensor2(res.alarmgraph)
-      //         this.getSensor3(res.devalarmgraph)
-      //       }
-      //     }
-      //   }, this)
-      // }
+      }
     },
     mounted () {
       this.getData()
-      this.getSensor()
-      this.getSensor1()
-      this.getSensor2()
-      this.getSensor3()
-      // this.getBottom()
     },
     created() {
       this.height = document.documentElement.clientHeight - 55

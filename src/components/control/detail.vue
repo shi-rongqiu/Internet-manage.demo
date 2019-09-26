@@ -57,10 +57,13 @@ export default {
       mylib.axios({
         url: '/app/actual/line',
         params: {
-          sensorCode: this.code,
+          sensorcode: this.code,
           deviceCode: this.id,
           startTime: this.startTime,
           endTime: this.endTime
+        },
+        headers: {
+          "Content-Type": "application/json;charset=UTF-8"
         },
         type: 'post',
         done (res) {
@@ -75,14 +78,12 @@ export default {
       if (this.endTime && this.startTime && this.endTime <= this.startTime) {
         return this.$message.warning('结束时间在开始时间之前！')
       }
-      if (this.endTime && this.startTime) {
-      }
     },
     getData (list) {
       list.forEach((item) => {
         item.myChart = {
           title : {
-            text: item.sensortype
+            text: item.SENSORTYPE
           },
           legend: {
             data:item.legend
@@ -94,7 +95,7 @@ export default {
             top:'40px',
             left: '0',
             right: '10%',
-            bottom: '0',
+            bottom: '5px',
             containLabel: true
           },
           toolbox: {

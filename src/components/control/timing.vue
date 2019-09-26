@@ -16,11 +16,11 @@
         <el-button type="primary" @click="search" style="margin-left:10px;">搜索</el-button>
       </div>
     </div>
-<!--    :span-method="objectSpanMethod"-->
     <div class="children">
       <el-table
         :data="list"
         :max-height="height"
+        :span-method="objectSpanMethod"
         border
         style="width: 100%;">
         <el-table-column
@@ -32,56 +32,59 @@
         </el-table-column>
         <el-table-column
           width="170"
-          prop="name"
+          prop="ACSNAME"
           label="站点">
         </el-table-column>
         <el-table-column
           width="140"
-          prop="deviceName"
+          prop="DEVICENAME"
           label="电力设备">
         </el-table-column>
         <el-table-column
-          prop="sensorCode"
+          prop="SENSORCODE"
           width="120"
           label="编号">
         </el-table-column>
         <el-table-column
-          prop="sensorTypeName"
+          prop="SENSORTYPENAME"
           label="类型">
         </el-table-column>
         <el-table-column
-          width="90"
-          prop="measurement"
+          prop="SENSORUNITTYPE"
+          label="型号">
+        </el-table-column>
+        <el-table-column
+          prop="MEASUREMENT"
           label="当前值">
         </el-table-column>
         <el-table-column
           prop="power"
-          width="60"
+          width="80"
           label="电量">
           <template slot-scope="scope">
             <span>{{scope.row.power}}%</span>
           </template>
         </el-table-column>
         <el-table-column
-          prop="location"
+          prop="LOCATION"
           label="安装位置">
         </el-table-column>
         <el-table-column
-          width="60"
-          prop="isOnline"
+          width="80"
+          prop="ISONLINE"
           label="状态">
           <template slot-scope="scope">
-            <span v-if="scope.row.isOnline == 1">在线</span>
-            <span style="color:#ffa000;" v-if="scope.row.isOnline == 0">离线</span>
+            <span v-if="scope.row.ISONLINE == 1">在线</span>
+            <span style="color:#ffa000;" v-if="scope.row.ISONLINE == 0">离线</span>
           </template>
         </el-table-column>
         <el-table-column
-          prop="alarmnum"
+          prop="ALARMNUM"
           width="60"
           label="告警">
         </el-table-column>
         <el-table-column
-          prop="reportTime"
+          prop="REPORTTIME"
           width="140"
           label="时间">
         </el-table-column>
@@ -120,9 +123,7 @@ export default {
       pageSize: 10,
       total: 0,
       types: [],
-      list: [
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',sensorCode: '509275', sensorTypeName: '温度传感器', measurement: '20℃',power: 60,isOnline: 1,location: '保险柜',alarmnum: 1,reportTime: '2019-3-9'}
-      ],
+      list: [],
       type: '',
       code: '',
       device: '',
@@ -143,12 +144,12 @@ export default {
       this.getList()
     },
     enterDetail (row) {
-      this.$router.push({path: '/control/detail', name: 'dataDetail', query: {device: row.deviceName, code: row.deviceCode}})
+      this.$router.push({path: '/control/detail', name: 'dataDetail', query: {device: row.DEVICENAME, code: row.DEVICECODE}})
     },
     getTypes () {
       mylib.axios({
-        url: '/app/sensor/querysensortype',
-        type: 'post',
+        url: '/app/sensortype/list',
+        type: 'get',
         done (res) {
           if (res.code === 0) {
             this.types = res.rows
@@ -177,7 +178,7 @@ export default {
                 this.pos = 0
               } else {
                 // 判断当前元素与上一个元素是否相同(第1和第2列)
-                if (this.list[i].deviceCode === this.list[i - 1].deviceCode) {
+                if (this.list[i].DEVICECODE === this.list[i - 1].DEVICECODE) {
                   this.spanArr[this.pos] += 1
                   this.spanArr.push(0)
                 } else {
@@ -194,23 +195,23 @@ export default {
     handleCurrentChange () {
       this.getList()
     },
-    // objectSpanMethod({ row, column, rowIndex, columnIndex }) {
-    //   if (columnIndex === 1 || columnIndex === 2 || columnIndex === 11) {
-    //     const _row = this.spanArr[rowIndex]
-    //     const _col = _row > 0 ? 1 : 0
-    //     return {
-    //       rowspan: _row,
-    //       colspan: _col
-    //     }
-    //   }
-    // }
+    objectSpanMethod({ row, column, rowIndex, columnIndex }) {
+      if (columnIndex === 1 || columnIndex === 2 || columnIndex === 12) {
+        const _row = this.spanArr[rowIndex]
+        const _col = _row > 0 ? 1 : 0
+        return {
+          rowspan: _row,
+          colspan: _col
+        }
+      }
+    }
   },
   mounted () {
 
   },
   created () {
     this.height = document.documentElement.clientHeight - 250
-    // this.getList()
+    this.getList()
     this.getTypes()
   }
 }

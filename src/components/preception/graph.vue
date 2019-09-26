@@ -5,11 +5,17 @@
         站点名称：<el-input class="input" placeholder="请输入" v-model="keyword"></el-input>
       </div>
       <div>
-        传感器编号：<el-input class="input" placeholder="请输入" v-model="code"></el-input>
+        编号：<el-input class="input" placeholder="请输入" v-model="code"></el-input>
         <el-button type="primary" @click="search" style="margin-left:10px;">搜索</el-button>
       </div>
     </div>
     <div class="children">
+      <div class="operate" v-if="activeName == 2">
+        <div @click="add" class="btn">
+          <div><img src="../../assets/img/add-icon.png" alt=""></div>
+          <div>新增</div>
+        </div>
+      </div>
       <el-tabs type="border-card" v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="传感器列表" name="1">
           <el-table
@@ -25,29 +31,29 @@
               label="序号">
             </el-table-column>
             <el-table-column
-              prop="name"
+              prop="ACSNAME"
               label="站点">
             </el-table-column>
             <el-table-column
-              prop="sensorCode"
-              width="120"
+              prop="SENSORCODE"
+              width="130"
               label="编号">
             </el-table-column>
             <el-table-column
-              prop="sensorTypeName"
+              prop="SENSORTYPENAME"
               label="类型">
             </el-table-column>
             <el-table-column
-              prop="sensorUnitType"
-              width="120"
+              prop="SENSORUNITTYPE"
+              width="130"
               label="型号">
             </el-table-column>
             <el-table-column
-              prop="supplier"
+              prop="SUPPLIER"
               label="厂家">
             </el-table-column>
             <el-table-column
-              prop="mark"
+              prop="MARK"
               label="备注">
             </el-table-column>
           </el-table>
@@ -72,23 +78,23 @@
               label="序号">
             </el-table-column>
             <el-table-column
-              prop="name"
+              prop="ACSNAME"
               label="站点">
             </el-table-column>
             <el-table-column
-              prop="deviceName"
+              prop="DEVICENAME"
               label="电力设备名称">
             </el-table-column>
             <el-table-column
-              prop="deviceCode"
+              prop="DEVICECODE"
               label="编号">
             </el-table-column>
             <el-table-column
-              prop="typeName"
+              prop="DEVICETYPENAME"
               label="电力设备类型">
             </el-table-column>
             <el-table-column
-              prop="typeCode"
+              prop="DEVICETYPECODE"
               label="类型编号">
             </el-table-column>
             <el-table-column
@@ -97,8 +103,8 @@
                 <el-button type="text" @click="edit(scope.row.id)">
                   修改
                 </el-button>
-                <el-button type="text" @click="add">
-                  新增
+                <el-button type="text" @click="del(scope.row.id)">
+                  删除
                 </el-button>
               </template>
             </el-table-column>
@@ -118,27 +124,31 @@
               label="序号">
             </el-table-column>
             <el-table-column
-              prop="name"
+              prop="ACSNAME"
               label="站点">
             </el-table-column>
             <el-table-column
-              prop="code"
+              prop="CODE"
               label="编号">
             </el-table-column>
             <el-table-column
-              prop="unitType"
+              prop="AGSNAME"
+              label="名称">
+            </el-table-column>
+            <el-table-column
+              prop="UNITTYPE"
               label="型号">
             </el-table-column>
             <el-table-column
-              prop="supplier"
+              prop="SUPPLIER"
               label="厂家">
             </el-table-column>
             <el-table-column
-              prop="location"
+              prop="LOCATION"
               label="安装位置">
             </el-table-column>
             <el-table-column
-              prop="mark"
+              prop="MARK"
               label="备注">
             </el-table-column>
           </el-table>
@@ -197,7 +207,9 @@
             站点：
           </el-col>
           <el-col :span="10">
-            <el-input placeholder="请输入" v-model="typeCode"></el-input>
+            <el-select v-model="site">
+              <el-option v-for="(item, index) in sites" :key="index" :value="item.code" :label="item.name"></el-option>
+            </el-select>
           </el-col>
         </el-row>
         <span slot="footer" class="dialog-footer notable">
@@ -219,12 +231,9 @@ export default {
       currentPage: 1,
       pageSize: 10,
       total: 0,
-      pointList: [
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',unitType: '汇聚节点',code: '509275', sensorTypeName: '温度传感器', nodeCode: '12313265465',supplier: '英锐祺',threshold: 1,alarm: 1,location: '保险柜',alarmnum: 1,reportTime: '2019-3-9'}
-      ],
+      pointList: [],
       keyword: '',
       code: '',
-      action: mylib.URL + '/app/agsNode/leadexcel',
       DialogVisible1: false,
       deviceName: '',
       deviceCode: '',
@@ -232,12 +241,10 @@ export default {
       deviceType: '',
       typeCode: '',
       height: null,
-      PIMList: [
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',typeName: '蓄电池组',typeCode: '509275', sensorTypeName: '温度传感器', deviceCode: '12313265465',supplier: '英锐祺',threshold: 1,alarm: 1,location: '保险柜',alarmnum: 1,reportTime: '2019-3-9'}
-      ],
-      sensorList: [
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',sensorUnitType: 'IRW',sensorCode: '509275', sensorTypeName: '温度传感器', nodeCode: '12313265465',supplier: '英锐祺',threshold: 1,alarm: 1,location: '保险柜',alarmnum: 1,reportTime: '2019-3-9'}
-      ]
+      PIMList: [],
+      sensorList: [],
+      site: '',
+      sites: []
     }
   },
   methods: {
@@ -253,9 +260,9 @@ export default {
       if (this.activeName === '1') {
         this.getSensor()
       } else if (this.activeName === '2') {
-        // this.getPIM()
+        this.getPIM()
       } else {
-        // this.getPoint()
+        this.getPoint()
       }
     },
     add () {
@@ -266,14 +273,16 @@ export default {
       this.deviceCode = ''
       this.deviceType = ''
       this.typeCode = ''
+      this.site = ''
+      this.getSite()
     },
     search () {
       if (this.activeName === '1') {
         this.getSensor()
       } else if (this.activeName === '2') {
-        // this.getPIM()
+        this.getPIM()
       } else {
-        // this.getPoint()
+        this.getPoint()
       }
     },
     handleSizeChange (val) {
@@ -281,44 +290,33 @@ export default {
       if (this.activeName === '1') {
         this.getSensor()
       } else if (this.activeName === '2') {
-        // this.getPIM()
+        this.getPIM()
       } else {
-        // this.getPoint()
+        this.getPoint()
       }
     },
-    handleUpload (response, file, fileList) {
-      if (response.code === 0) {
-        this.$message.success(response.rows)
-        // this.getPoint()
-      } else {
-        this.$message.error(response.msg)
-      }
+    getPoint () {
+      mylib.axios({
+        url: '/app/sub/queryAgsnode',
+        type: 'post',
+        params: {
+          acsname: this.keyword,
+          code: this.code,
+          page: this.currentPage,
+          limit: this.pageSize
+        },
+        done (res) {
+          this.pointList = res.agsnode
+          this.total = res.total
+        }
+      }, this)
     },
-    download () {
-      window.location.href = mylib.URL + '/app/agsNode/exportExcel?token=token&location=' + this.keyword + '&code=' + this.code
-    },
-    // getPoint () {
-    //   mylib.axios({
-    //     url: '/app/sub/queryAgsnode',
-    //     type: 'get',
-    //     params: {
-    //       location: this.keyword,
-    //       code: this.code,
-    //       page: this.currentPage,
-    //       limit: this.pageSize
-    //     },
-    //     done (res) {
-    //       this.pointList = res.rows
-    //       this.total = res.total
-    //     }
-    //   }, this)
-    // },
     edit (id) {
       this.title = '修改'
       this.deviceId = id
       this.DialogVisible1 = true
       mylib.axios({
-        url: '/app/device/get',
+        url: '/app/sub/get',
         type: 'get',
         params: {
           id: id
@@ -329,6 +327,7 @@ export default {
             this.deviceCode = res.data.deviceCode
             this.deviceType = res.data.typeName
             this.typeCode = res.data.typeCode
+            this.site = res.data.node
           } else {
             this.$message(res.msg)
           }
@@ -338,22 +337,24 @@ export default {
     savePoint () {
       if (this.deviceId) {
         mylib.axios({
-          url: '/app/device/update',
+          url: '/app/sub/update',
           params: {
             id: this.deviceId,
-            deviceName: this.deviceName,
-            deviceCode: this.deviceCode,
-            typeName: this.deviceType,
-            typeCode: this.typeCode
+            devicename: this.deviceName,
+            devicecode: this.deviceCode,
+            devicetypename: this.deviceType,
+            devicetypecode: this.typeCode,
+            acsnodecode: this.site
           },
           type: 'put',
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8"
+          },
           done (res) {
             if (res.code === 0) {
               this.$message.success('修改成功')
               this.DialogVisible1 = false
-              this.deviceName = ''
-              this.deviceCode = ''
-              // this.getPIM()
+              this.getPIM()
             } else {
               this.$message.error(res.msg)
             }
@@ -361,19 +362,23 @@ export default {
         }, this)
       } else {
         mylib.axios({
-          url: '/app/device/insert',
+          url: '/app/sub/save',
           params: {
-            deviceName: this.deviceName,
-            deviceCode: this.deviceCode,
-            typeName: this.deviceType,
-            typeCode: this.typeCode
+            devicename: this.deviceName,
+            devicecode: this.deviceCode,
+            devicetypename: this.deviceType,
+            devicetypecode: this.typeCode,
+            acsnodecode: this.site
+          },
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8"
           },
           type: 'post',
           done (res) {
             if (res.code === 0) {
               this.$message.success('添加成功')
               this.DialogVisible1 = false
-              // this.getPIM()
+              this.getPIM()
             } else {
               this.$message.error(res.msg)
             }
@@ -381,37 +386,37 @@ export default {
         }, this)
       }
     },
-    // getPIM () {
-    //   mylib.axios({
-    //     url: '/app/sub/queryDevice',
-    //     type: 'get',
-    //     params: {
-    //       keyword: this.keyword,
-    //       deviceCode: this.code,
-    //       page: this.currentPage,
-    //       limit: this.pageSize
-    //     },
-    //     done (res) {
-    //       if (res.code === 0) {
-    //         this.PIMList = res.rows
-    //         this.total = res.total
-    //       }
-    //     }
-    //   }, this)
-    // },
+    getPIM () {
+      mylib.axios({
+        url: '/app/sub/queryDevice',
+        type: 'post',
+        params: {
+          acsname: this.keyword,
+          devicecode: this.code,
+          page: this.currentPage,
+          limit: this.pageSize
+        },
+        done (res) {
+          if (res.code === 0) {
+            this.PIMList = res.device
+            this.total = res.total
+          }
+        }
+      }, this)
+    },
     getSensor () {
       mylib.axios({
         url: '/app/sub/querySensor',
-        type: 'get',
+        type: 'post',
         params: {
-          keyword: this.keyword,
+          acsname: this.keyword,
           sensorCode: this.code,
           page: this.currentPage,
           limit: this.pageSize
         },
         done (res) {
           if (res.code === 0) {
-            this.sensorList = res.rows
+            this.sensorList = res.sensor
             this.total = res.total
           }
         }
@@ -421,9 +426,9 @@ export default {
       if (this.activeName === '1') {
         this.getSensor()
       } else if (this.activeName === '2') {
-        // this.getPIM()
+        this.getPIM()
       } else {
-        // this.getPoint()
+        this.getPoint()
       }
     },
     del (id) {
@@ -434,7 +439,7 @@ export default {
         type: 'warning'
       }).then(() => {
         mylib.axios({
-          url: '/app/device/delete',
+          url: '/app/sub/delete',
           type: 'post',
           params: {
             id: id
@@ -442,7 +447,7 @@ export default {
           done (res) {
             if (res.code === 0) {
               this.$message.success('删除成功')
-              // this.getPIM()
+              this.getPIM()
             } else {
               this.$message({
                 type: 'error',
@@ -457,11 +462,23 @@ export default {
           message: '已取消'
         })
       })
+    },
+    getSite () {
+      mylib.axios({
+        url: '/app/acsnode/list',
+        type: 'post',
+        params: {
+          status: 1
+        },
+        done (res) {
+          this.sites = res.rows
+        }
+      }, this)
     }
   },
   created () {
     this.height = document.documentElement.clientHeight - 290
-    // this.getSensor()
+    this.getSensor()
   },
   mounted () {
 
@@ -470,8 +487,15 @@ export default {
 </script>
 
 <style scoped>
-  .children-table{height:calc(100% - 50px);}
-  .upload-demo{float:right;margin:0 10px;}
+  .children{
+    position:relative;
+  }
+  .operate{
+    position:absolute;
+    top:10px;
+    right:15px;
+    z-index:22;
+  }
   .item{
     margin-top:20px;
   }

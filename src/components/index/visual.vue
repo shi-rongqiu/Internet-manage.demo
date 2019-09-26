@@ -3,8 +3,7 @@
     <div style="height:51%;" class="back">
       <div class="header-search">
         <el-tabs type="border-card" v-model="activeName" @tab-click="handleClick">
-          <el-tab-pane label="石家庄220kV子龙站(GIS)" name="1"></el-tab-pane>
-          <el-tab-pane label="保定110kV下河西站(AIS)" name="2"></el-tab-pane>
+          <el-tab-pane v-for="(item, index) in pointList" :key="index" :label="item.name" :name="item.code"></el-tab-pane>
         </el-tabs>
       </div>
       <div class="chart-container">
@@ -103,11 +102,15 @@ export default {
       endTime: '',
       show: false,
       height: null,
-      activeName: '1'
+      activeName: '',
+      pointList: []
     }
   },
   methods: {
-    handleClick () {},
+    handleClick () {
+      this.getData()
+      this.getBottom()
+    },
     showTime () {
       this.show = true
       this.select = 4
@@ -127,13 +130,13 @@ export default {
         this.getBottom()
       }
     },
-    getSensor () {
-      var name = ['温度传感器', '湿度传感器']
-      // var data1 = []
-      // data.forEach((el) => {
-      //   name.push(el.sensorTypeName)
-      //   data1.push(el.sensorNum)
-      // })
+    getSensor (data) {
+      var name = []
+      var data1 = []
+      data.forEach((el) => {
+        name.push(el.SENSORTYPENAME)
+        data1.push(el.SENSORNUM)
+      })
       this.myChart = {
         title: {
         },
@@ -142,7 +145,7 @@ export default {
           top:'27px',
           left: '0',
           right: '0',
-          bottom: '0',
+          bottom: '5px',
           containLabel: true
         },
         xAxis: {
@@ -165,28 +168,12 @@ export default {
             color: '#278cff'
           },
           barWidth: 30,
-          data: [20, 30]
+          data: data1
         }]
       }
     },
-    getSensor1 () {
+    getSensor1 (data) {
       var name = []
-      var data = [
-        {
-          basicDeviceSensorList: [
-            {typeName: '蓄电池组', sensorNum: 5},
-            {typeName: '开关柜', sensorNum: 3}
-          ],
-          sensorTypeName: '温度传感器'
-        },
-        {
-          basicDeviceSensorList: [
-            {typeName: '蓄电池组', sensorNum: 4},
-            {typeName: '开关柜', sensorNum: 1}
-          ],
-          sensorTypeName: '湿度传感器'
-        }
-      ]
       var data1 = []
       if (data.length > 0) {
         data[0].basicDeviceSensorList.forEach((al) => {
@@ -219,21 +206,8 @@ export default {
           top:'20px',
           left: '0',
           right: '0',
-          bottom: '0',
+          bottom: '5px',
           containLabel: true
-        },
-        toolbox: {
-          show : true,
-          orient: 'vertical',
-          x: 'right',
-          y: 'center',
-          feature : {
-            mark : {show: true},
-            dataView : {show: true, readOnly: false},
-            magicType : {show: true, type: ['line', 'bar', 'stack', 'tiled']},
-            restore : {show: true},
-            saveAsImage : {show: true}
-          }
         },
         calculable : true,
         xAxis : [
@@ -258,22 +232,17 @@ export default {
         series: data1
       }
     },
-    getSensor2 () {
-      var data = [
-        {majorType: 0,alarmNum:1},
-        {majorType: 1,alarmNum:3},
-        {majorType: 2,alarmNum:4}
-      ]
+    getSensor2 (data) {
       var data1 = []
       data.forEach((el) => {
-        if (el.majorType === 0) {
-          data1.push({value:data[0].alarmNum, name:'APP告警', itemStyle: {color: '#ffbf00'}})
+        if (el.MAJORTYPE === 0) {
+          data1.push({value:data[0].ALARMNUM, name:'APP告警', itemStyle: {color: '#ffbf00'}})
         }
-        if (el.majorType === 1) {
-          data1.push({value:data[1].alarmNum, name:'设备告警', itemStyle: {color: '#5a7fff'}})
+        if (el.MAJORTYPE === 1) {
+          data1.push({value:data[1].ALARMNUM, name:'设备告警', itemStyle: {color: '#5a7fff'}})
         }
-        if (el.majorType === 2) {
-          data1.push({value:data[2].alarmNum, name:'网络故障', itemStyle: {color: '#ff5a5a'}})
+        if (el.MAJORTYPE === 2) {
+          data1.push({value:data[2].ALARMNUM, name:'网络故障', itemStyle: {color: '#ff5a5a'}})
         }
       })
       this.myChart2 = {
@@ -289,10 +258,7 @@ export default {
         toolbox: {
           show : true,
           feature : {
-            mark : {show: true},
-            dataView : {show: true, readOnly: false},
             magicType : {
-              show: true,
               type: ['pie', 'funnel'],
               option: {
                 funnel: {
@@ -302,9 +268,7 @@ export default {
                   max: 1548
                 }
               }
-            },
-            restore : {show: true},
-            saveAsImage : {show: true}
+            }
           }
         },
         calculable : true,
@@ -318,16 +282,12 @@ export default {
         ]
       }
     },
-    getSensor3 () {
-      var data = [
-        {alarmNum: 2,typeName: '开关柜'},
-        {alarmNum: 2,typeName: '蓄电池组'}
-      ]
+    getSensor3 (data) {
       var data1 = []
       data.forEach((el) => {
         data1.push({
-          value: el.alarmNum,
-          name: el.typeName
+          value: el.ALARMNUM,
+          name: el.TYPENAME
         })
       })
       this.myChart3 = {
@@ -340,14 +300,14 @@ export default {
           width: '75%',
           itemWidth: 15
         },
-        visualMap: {
-          show: false,
-          min: 80,
-          max: 600,
-          inRange: {
-            colorLightness: [0, 1]
-          }
-        },
+        // visualMap: {
+        //   show: false,
+        //   min: 0,
+        //   max: 600,
+        //   inRange: {
+        //     colorLightness: [0, 1]
+        //   }
+        // },
         series : [
           {
             type:'pie',
@@ -388,45 +348,63 @@ export default {
     },
     getData () {
       mylib.axios({
-        url: '/app/topology/overview',
+        url: '/app/visual/overview',
         type: 'post',
+        params: {
+          acsnodecode: this.activeName
+        },
         done (res) {
           if (res.code === 0) {
             this.deviceNum = res.deviceNum
             this.sensorNum = res.sensorNum
             this.sensorOnlineNum = res.sensorOnlineNum
             this.agsNodenum = res.agsNodenum
-            // this.getSensor(res.sensorgraph)
-            // this.getSensor1(res.devicegraph)
+            this.getSensor(res.sensorgraph)
+            this.getSensor1(res.devicegraph)
           }
         }
       }, this)
     },
     getBottom () {
       mylib.axios({
-        url: '/app/topology/lodview',
+        url: '/app/visual/lodview',
         type: 'post',
         params: {
+          acsnodecode: this.activeName,
           custom: this.custom,
           startTime: this.startTime,
           endTime: this.endTime
         },
         done (res) {
           if (res.code === 0) {
-            // this.getSensor2(res.alarmgraph)
-            // this.getSensor3(res.devalarmgraph)
+            this.getSensor2(res.alarmgraph)
+            this.getSensor3(res.devalarmgraph)
+          }
+        }
+      }, this)
+    },
+    getPoint () {
+      mylib.axios({
+        url: '/app/acsnode/list',
+        type: 'post',
+        params: {
+          status: 1
+        },
+        done (res) {
+          if (res.code === 0) {
+            this.pointList = res.rows
+            this.activeName = res.rows[0].code
+            this.getData()
+            this.getBottom()
+          } else {
+            this.$message(res.msg)
           }
         }
       }, this)
     }
   },
   mounted () {
-    this.getSensor()
-    this.getSensor1()
-    this.getSensor2()
-    this.getSensor3()
-    this.getData()
-    this.getBottom()
+    this.getPoint()
   },
   created() {
     this.height = document.documentElement.clientHeight - 55

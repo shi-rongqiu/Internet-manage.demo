@@ -30,64 +30,64 @@
           label="序号">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="ACSNODENAME"
           width="170"
           label="站点">
         </el-table-column>
         <el-table-column
-          prop="majorType"
+          prop="MAJORTYPE"
           width="100"
           label="告警类型">
           <template slot-scope="scope">
-            <span v-if="scope.row.majorType == 0">协议告警</span>
-            <span v-if="scope.row.majorType == 1">设备告警</span>
-            <span v-if="scope.row.majorType == 2">APP告警</span>
+            <span v-if="scope.row.MAJORTYPE == 0">协议告警</span>
+            <span v-if="scope.row.MAJORTYPE == 1">设备告警</span>
+            <span v-if="scope.row.MAJORTYPE == 2">APP告警</span>
           </template>
         </el-table-column>
         <el-table-column
-          prop="sensorCode"
+          prop="SENSORCODE"
           width="110"
           label="传感器编号">
         </el-table-column>
         <el-table-column
-          prop="sensorTypeName"
+          prop="SENSORTYPENAME"
           label="传感器类型">
         </el-table-column>
         <el-table-column
-          prop="deviceName"
+          prop="DEVICENAME"
           label="设备名称">
         </el-table-column>
         <el-table-column
-          prop="grade"
+          prop="GRADE"
           width="70"
           label="严重性">
         </el-table-column>
         <el-table-column
-          prop="alarm"
+          prop="ALARM"
           width="70"
           label="告警值">
         </el-table-column>
         <el-table-column
           width="70"
-          prop="threshold"
+          prop="THRESOLD"
           label="阈值">
         </el-table-column>
         <el-table-column
-          prop="reportTime"
+          prop="REPORTTIME"
           width="140"
           label="上报时间">
         </el-table-column>
         <el-table-column
-          prop="status"
+          prop="STATUS"
           width="90"
           label="事件状态">
           <template slot-scope="scope">
-            <el-button type="text" v-if="scope.row.status == 1" @click="change(scope.row)">上报中</el-button>
-            <span v-if="scope.row.status == 0">已关闭</span>
+            <el-button type="text" v-if="scope.row.STATUS == 1" @click="change(scope.row)">上报中</el-button>
+            <span v-if="scope.row.STATUS == 0">已关闭</span>
           </template>
         </el-table-column>
         <el-table-column
-          prop="userCode"
+          prop="USERCODE"
           width="90"
           label="处理人">
         </el-table-column>
@@ -115,9 +115,7 @@ export default {
       currentPage: 1,
       pageSize: 10,
       total: 0,
-      WarnList: [
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',status: 1,sensorCode: '509275', sensorTypeName: '温度传感器', majorType: 1,grade: '严重',threshold: '45℃',alarm: '45℃',location: '保险柜',alarmnum: 1,reportTime: '2019-3-9'}
-      ],
+      WarnList: [],
       device: '',
       code: '',
       status: '',
@@ -165,7 +163,7 @@ export default {
     },
     getWarn () {
       mylib.axios({
-        url: '/app/alarm/queryAlarm',
+        url: '/app/actual/queryAlarm',
         type: 'post',
         params: {
           page: this.currentPage,
@@ -188,7 +186,7 @@ export default {
   },
   created () {
     this.height = document.documentElement.clientHeight - 250
-    // this.getWarn()
+    this.getWarn()
   },
   mounted () {
 

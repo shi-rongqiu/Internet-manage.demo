@@ -2,16 +2,16 @@
   <div class="container">
     <div class="header-top">
       <div>
-        站点名称：<el-input class="input" placeholder="请输入" v-model="keyword"></el-input>
+        站点名称：<el-input class="input" placeholder="请输入" v-model="acsname"></el-input>
       </div>
       <div>
-        传感器编号：<el-input class="input" placeholder="请输入" v-model="keyword"></el-input>
+        传感器编号：<el-input class="input" placeholder="请输入" v-model="sensorCode"></el-input>
       </div>
       <div>
-        电力设备名称：<el-input class="input" placeholder="请输入" v-model="keyword"></el-input>
+        电力设备名称：<el-input class="input" placeholder="请输入" v-model="deviceName"></el-input>
       </div>
       <div>
-        节点编号：<el-input class="input" placeholder="请输入" v-model="code"></el-input>
+        节点编号：<el-input class="input" placeholder="请输入" v-model="nodeCode"></el-input>
         <el-button type="primary" @click="search" style="margin-left:10px;">搜索</el-button>
       </div>
     </div>
@@ -29,52 +29,52 @@
           label="序号">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="ACSNAME"
           label="站点">
         </el-table-column>
         <el-table-column
-          prop="sensorCode"
+          prop="SENSORCODE"
           width="120"
           label="编号">
           <template slot-scope="scope">
             <el-button type="text" @click="check(scope.row)">
-              {{scope.row.sensorCode}}
+              {{scope.row.SENSORCODE}}
             </el-button>
           </template>
         </el-table-column>
         <el-table-column
-          prop="sensorTypeName"
+          prop="SENSORTYPENAME"
           label="类型">
         </el-table-column>
         <el-table-column
-          prop="sensorUnitType"
+          prop="SENSORUNITTYPE"
           width="120"
           label="型号">
         </el-table-column>
         <el-table-column
-          prop="deviceName"
+          prop="DEVICENAME"
           label="电力设备">
           <template slot-scope="scope">
             <el-button type="text" @click="check1(scope.row)">
-              {{scope.row.deviceName}}
+              {{scope.row.DEVICENAME}}
             </el-button>
           </template>
         </el-table-column>
         <el-table-column
-          prop="location"
+          prop="LOCATION"
           label="具体位置">
         </el-table-column>
         <el-table-column
-          prop="nodeCode"
+          prop="NODECODE"
           label="所属节点编号">
           <template slot-scope="scope">
             <el-button type="text" @click="check2(scope.row)">
-              {{scope.row.nodeCode}}
+              {{scope.row.NODECODE}}
             </el-button>
           </template>
         </el-table-column>
         <el-table-column
-          prop="location"
+          prop="AGSLOCATION"
           label="节点位置">
         </el-table-column>
       </el-table>
@@ -90,7 +90,7 @@
         </el-pagination>
       </div>
       <el-dialog
-        title="传感器"
+        title="传感器详情"
         :visible.sync="DialogVisible1"
         width="38%"
         center>
@@ -100,7 +100,7 @@
             传感器编号：
           </el-col>
           <el-col :span="11">
-            <div class="dialog-line">{{sensor.sensorCode}}</div>
+            <div class="dialog-line">{{sensor.SENSORCODE}}</div>
           </el-col>
         </el-row>
         <el-row style="margin-top:20px;">
@@ -108,7 +108,7 @@
             传感器类型：
           </el-col>
           <el-col :span="11">
-            <div class="dialog-line">{{sensor.sensorTypeName}}</div>
+            <div class="dialog-line">{{sensor.SENSORTYPENAME}}</div>
           </el-col>
         </el-row>
         <el-row style="margin-top:20px;">
@@ -116,7 +116,7 @@
             传感器型号：
           </el-col>
           <el-col :span="11">
-            <div class="dialog-line">{{sensor.sensorUnitType}}</div>
+            <div class="dialog-line">{{sensor.SENSORUNITTYPE}}</div>
           </el-col>
         </el-row>
         <el-row style="margin-top:20px;">
@@ -124,22 +124,30 @@
             厂家：
           </el-col>
           <el-col :span="11">
-            <div class="dialog-line">{{sensor.supplier}}</div>
+            <div class="dialog-line">{{sensor.SUPPLIER}}</div>
           </el-col>
         </el-row>
       </el-dialog>
       <el-dialog
-        title="电力设备"
+        title="PMS台账详情"
         :visible.sync="DialogVisible2"
         width="38%"
         center>
         <div class="dialog-bottom"><img src="../../assets/img/dialog_bg.png" alt=""></div>
         <el-row>
           <el-col :span="4" :offset="5" style="margin-top:10px;">
-            设备名称：
+            站点：
           </el-col>
           <el-col :span="10">
-            <div class="dialog-line">{{devices.deviceName}}</div>
+            <div class="dialog-line">{{devices.ACSNAME}}</div>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="4" :offset="5" style="margin-top:10px;">
+            电力设备名称：
+          </el-col>
+          <el-col :span="10">
+            <div class="dialog-line">{{devices.DEVICENAME}}</div>
           </el-col>
         </el-row>
         <el-row style="margin-top:20px;">
@@ -147,7 +155,7 @@
             设备编号：
           </el-col>
           <el-col :span="10">
-            <div class="dialog-line">{{devices.deviceCode}}</div>
+            <div class="dialog-line">{{devices.DEVICECODE}}</div>
           </el-col>
         </el-row>
         <el-row style="margin-top:20px;">
@@ -155,7 +163,7 @@
             设备类型：
           </el-col>
           <el-col :span="10">
-            <div class="dialog-line">{{devices.typeName}}</div>
+            <div class="dialog-line">{{devices.DEVICETYPENAME}}</div>
           </el-col>
         </el-row>
         <el-row style="margin-top:20px;">
@@ -163,46 +171,46 @@
             类型编号：
           </el-col>
           <el-col :span="10">
-            <div class="dialog-line">{{devices.typeCode}}</div>
+            <div class="dialog-line">{{devices.DEVICETYPECODE}}</div>
           </el-col>
         </el-row>
       </el-dialog>
       <el-dialog
-        title="汇聚节点"
+        title="汇聚节点详情"
         :visible.sync="DialogVisible3"
         width="38%"
         center>
         <div class="dialog-bottom"><img src="../../assets/img/dialog_bg.png" alt=""></div>
         <el-row>
           <el-col :span="4" :offset="5" style="margin-top:10px;">
-            节点编号：
+            站点：
           </el-col>
           <el-col :span="10">
-            <div class="dialog-line">{{node.code}}</div>
+            <div class="dialog-line">{{node.ACSNAME}}</div>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="4" :offset="5" style="margin-top:10px;">
+            编号：
+          </el-col>
+          <el-col :span="10">
+            <div class="dialog-line">{{node.CODE}}</div>
           </el-col>
         </el-row>
         <el-row style="margin-top:20px;">
           <el-col :span="4" :offset="5" style="margin-top:10px;">
-            节点类型：
+            型号：
           </el-col>
           <el-col :span="10">
-            <div class="dialog-line">{{node.type == 0 ? 'client' : node.type == 1 ? 'relay' : ''}}</div>
+            <div class="dialog-line">{{node.UNITTYPE}}</div>
           </el-col>
         </el-row>
         <el-row style="margin-top:20px;">
           <el-col :span="4" :offset="5" style="margin-top:10px;">
-            节点型号：
+            厂家：
           </el-col>
           <el-col :span="10">
-            <div class="dialog-line">{{node.unitType}}</div>
-          </el-col>
-        </el-row>
-        <el-row style="margin-top:20px;">
-          <el-col :span="4" :offset="5" style="margin-top:10px;">
-            安装位置：
-          </el-col>
-          <el-col :span="10">
-            <div class="dialog-line">{{node.location}}</div>
+            <div class="dialog-line">{{node.SUPPLIER}}</div>
           </el-col>
         </el-row>
       </el-dialog>
@@ -222,15 +230,15 @@ export default {
       currentPage: 1,
       pageSize: 10,
       total: 0,
-      sensorList: [
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',sensorUnitType: 'IRW',sensorCode: '509275', sensorTypeName: '温度传感器', nodeCode: '12313265465',grade: '严重',threshold: 1,alarm: 1,location: '保险柜',alarmnum: 1,reportTime: '2019-3-9'}
-      ],
-      keyword: '',
-      code: '',
+      sensorList: [],
       height: null,
       sensor: {},
       devices: {},
-      node: {}
+      node: {},
+      acsname: '',
+      sensorCode: '',
+      deviceName: '',
+      nodeCode: ''
     }
   },
   methods: {
@@ -242,7 +250,7 @@ export default {
         url: '/app/general/querySensor',
         type: 'get',
         params: {
-          sensorCode: row.sensorCode
+          sensorCode: row.SENSORCODE
         },
         done (res) {
           if (res.code === 0) {
@@ -259,7 +267,7 @@ export default {
         url: '/app/general/queryDevice',
         type: 'get',
         params: {
-          deviceCode: row.deviceCode
+          deviceCode: row.DEVICECODE
         },
         done (res) {
           if (res.code === 0) {
@@ -276,12 +284,12 @@ export default {
         url: '/app/general/queryAgsnode',
         type: 'get',
         params: {
-          nodeCode: row.nodeCode
+          nodeCode: row.NODECODE
         },
         done (res) {
           if (res.code === 0) {
             this.DialogVisible3 = true
-            this.node = res.agsNode
+            this.node = res.agsnode
           } else {
             this.$message.error(res.msg)
           }
@@ -300,14 +308,16 @@ export default {
         url: '/app/general/list',
         type: 'post',
         params: {
-          keyword: this.keyword,
-          sensorCode: this.code,
+          acsname: this.acsname,
+          sensorCode: this.sensorCode,
+          deviceName: this.deviceName,
+          nodeCode: this.nodeCode,
           page: this.currentPage,
           limit: this.pageSize
         },
         done (res) {
           if (res.code === 0) {
-            this.sensorList = res.rows
+            this.sensorList = res.general
             this.total = res.total
           }
         }
@@ -319,7 +329,7 @@ export default {
   },
   created () {
     this.height = document.documentElement.clientHeight - 250
-    // this.getSensor()
+    this.getSensor()
   },
   mounted () {
 

@@ -29,7 +29,7 @@
       <div class="two-container">
         <div class="table-header">
           基本信息
-          <span class="el-icon-circle-plus add"></span>
+          <span class="el-icon-circle-plus add" @click="addBase"></span>
         </div>
         <el-table
           :data="baseInfor"
@@ -70,18 +70,15 @@
             align="center"
             label="操作">
             <template slot-scope="scope">
-              <el-button type="text" @click="delBase(scope.$index)">
+              <el-button type="text" @click="del(scope.row.id, scope.$index, '1')">
                 删除
-              </el-button>
-              <el-button type="text" @click="addBase(scope.$index)">
-                添加
               </el-button>
             </template>
           </el-table-column>
         </el-table>
         <div class="table-header">
           测量值
-          <span class="el-icon-circle-plus add"></span>
+          <span class="el-icon-circle-plus add" @click="addMeasure"></span>
         </div>
         <el-table
           :data="measure"
@@ -122,18 +119,15 @@
             align="center"
             label="操作">
             <template slot-scope="scope">
-              <el-button type="text" @click="delMeasure(scope.$index)">
+              <el-button type="text" @click="del(scope.row.id, scope.$index, '2')">
                 删除
-              </el-button>
-              <el-button type="text" @click="addMeasure(scope.$index)">
-                添加
               </el-button>
             </template>
           </el-table-column>
         </el-table>
         <div class="table-header">
           定值
-          <span class="el-icon-circle-plus add"></span>
+          <span class="el-icon-circle-plus add" @click="addConstant"></span>
         </div>
         <el-table
           border
@@ -174,18 +168,15 @@
             align="center"
             label="操作">
             <template slot-scope="scope">
-              <el-button type="text" @click="delConstant(scope.$index)">
+              <el-button type="text" @click="del(scope.row.id, scope.$index, '3')">
                 删除
-              </el-button>
-              <el-button type="text" @click="addConstant(scope.$index)">
-                添加
               </el-button>
             </template>
           </el-table-column>
         </el-table>
         <div class="table-header">
           状态信息
-          <span class="el-icon-circle-plus add"></span>
+          <span class="el-icon-circle-plus add" @click="addStatus"></span>
         </div>
         <el-table
           border
@@ -226,11 +217,8 @@
             align="center"
             label="操作">
             <template slot-scope="scope">
-              <el-button type="text" @click="delStatus(scope.$index)">
+              <el-button type="text" @click="del(scope.row.id, scope.$index, '4')">
                 删除
-              </el-button>
-              <el-button type="text" @click="addStatus(scope.$index)">
-                添加
               </el-button>
             </template>
           </el-table-column>
@@ -254,26 +242,10 @@ export default {
       sensorCode: '',
       status: '',
       mark: '',
-      baseInfor: [{
-        paramNameCh: '',
-        paramNameEn: '',
-        paramUnit: ''
-      }],
-      measure: [{
-        paramNameCh: '',
-        paramNameEn: '',
-        paramUnit: ''
-      }],
-      constant: [{
-        paramNameCh: '',
-        paramNameEn: '',
-        paramUnit: ''
-      }],
-      statusInfor: [{
-        paramNameCh: '',
-        paramNameEn: '',
-        paramUnit: ''
-      }],
+      baseInfor: [],
+      measure: [],
+      constant: [],
+      statusInfor: [],
       id: ''
     }
   },
@@ -296,7 +268,7 @@ export default {
       }
       if (this.id) {
         mylib.axios({
-          url: '/app/sensortype/update',
+          url: '/app/sensormeta/update',
           type: 'put',
           params: {
             id: this.id,
@@ -309,16 +281,19 @@ export default {
             observedList: this.measure,
             statusList: this.statusInfor
           },
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8"
+          },
           done (res) {
             if (res.code === 0) {
-              this.$message('修改成功！')
-              this.$router.push('/site/manage')
+              this.$message.success('修改成功！')
+              this.$router.push('/preception/data')
             }
           }
         }, this)
       } else {
         mylib.axios({
-          url: '/app/sensortype/save',
+          url: '/app/sensormeta/save',
           type: 'post',
           params: {
             sensorTypeName: this.sensorName,
@@ -330,79 +305,125 @@ export default {
             observedList: this.measure,
             statusList: this.statusInfor
           },
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8"
+          },
           done (res) {
             if (res.code === 0) {
-              this.$message('保存成功！')
+              this.$message.success('保存成功！')
               this.$router.push('/preception/data')
             }
           }
         }, this)
       }
     },
-    addBase (index) {
-      this.baseInfor.splice(index + 1, 0, {
+    addBase () {
+      this.baseInfor.push({
         paramNameCh: '',
         paramNameEn: '',
         paramUnit: ''
       })
     },
-    delBase (index) {
-      this.baseInfor.splice(index, 1)
+    del (id, index, type) {
+      if (id) {
+        this.$confirm('此操作将删除该条信息, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          cancelButtonClass: 'cancel',
+          type: 'warning'
+        }).then(() => {
+          mylib.axios({
+            url: '/app/sensormeta/delete',
+            type: 'post',
+            params: {
+              id: id
+            },
+            done (res) {
+              if (res.code === 0) {
+                this.$message({
+                  type: 'success',
+                  message: '删除成功!'
+                })
+                if (type === '1') {
+                  this.baseInfor.splice(index, 1)
+                } else if (type === '2') {
+                  this.measure.splice(index, 1)
+                } else if (type === '3') {
+                  this.constant.splice(index, 1)
+                } else {
+                  this.statusInfor.splice(index, 1)
+                }
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: '删除出错!'
+                })
+              }
+            }
+          }, this)
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
+      } else {
+        if (type === '1') {
+          this.baseInfor.splice(index, 1)
+        } else if (type === '2') {
+          this.measure.splice(index, 1)
+        } else if (type === '3') {
+          this.constant.splice(index, 1)
+        } else {
+          this.statusInfor.splice(index, 1)
+        }
+      }
     },
-    addMeasure (index) {
-      this.measure.splice(index + 1, 0, {
+    addMeasure () {
+      this.measure.push({
         paramNameCh: '',
         paramNameEn: '',
         paramUnit: ''
       })
     },
-    delMeasure (index) {
-      this.measure.splice(index, 1)
-    },
-    addConstant (index) {
-      this.constant.splice(index + 1, 0, {
+    addConstant () {
+      this.constant.push({
         paramNameCh: '',
         paramNameEn: '',
         paramUnit: ''
       })
     },
-    delConstant (index) {
-      this.constant.splice(index, 1)
-    },
-    addStatus (index) {
-      this.statusInfor.splice(index + 1, 0, {
+    addStatus () {
+      this.statusInfor.push({
         paramNameCh: '',
         paramNameEn: '',
         paramUnit: ''
       })
-    },
-    delStatus (index) {
-      this.statusInfor.splice(index, 1)
     },
     getData () {
       mylib.axios({
-        url: '/app/sensortype/detailmeta',
+        url: '/app/sensormeta/detailmeta',
         type: 'get',
         params: {
           id: this.id
         },
         done (res) {
           if (res.code === 0) {
-            // this.sensorName = res.sensortype.sensorTypeName
-            // this.sensorCode = res.sensortype.sensorTypeCode
-            // this.status = res.sensortype.sensorTypeStatus
-            // this.mark = res.sensortype.mark
-            // this.baseInfor = res.sensortype.basicList
-            // this.constant = res.sensortype.constantList
-            // this.measure = res.sensortype.observedList
-            // this.statusInfor = res.sensortype.statusList
+            this.sensorName = res.sensortype.sensorTypeName
+            this.sensorCode = res.sensortype.sensorTypeCode
+            this.status = res.sensortype.sensorTypeStatus
+            this.mark = res.sensortype.mark
+            this.baseInfor = res.sensortype.basicList
+            this.constant = res.sensortype.constantList
+            this.measure = res.sensortype.observedList
+            this.statusInfor = res.sensortype.statusList
           }
         }
       }, this)
     }
   },
   created () {
-    this.id = this.$route.params.id
+    this.id = this.$route.query.id
     if (this.id) {
       this.getData()
     }

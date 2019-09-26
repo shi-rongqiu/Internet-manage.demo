@@ -2,10 +2,14 @@
   <div class="container">
     <div class="header-top">
       <div>
-        传感器编号：<el-input class="input" placeholder="请输入" v-model="keyword"></el-input>
+        传感器类型名称：<el-input class="input" placeholder="请输入" v-model="keyword"></el-input>
       </div>
       <div>
-        状态：<el-input class="input" placeholder="请输入" v-model="code"></el-input>
+        状态：
+        <el-select v-model="status" clearable>
+          <el-option value="1" label="已上架"></el-option>
+          <el-option value="0" label="下架中"></el-option>
+        </el-select>
         <el-button type="primary" @click="search" style="margin-left:10px;">搜索</el-button>
       </div>
     </div>
@@ -86,55 +90,36 @@
       center>
       <div class="dialog-title"><span></span>基本信息</div>
       <div class="dialog-item">
-        <div>
-          <div style="width:100px;">传感器名称：</div>
-          <div></div>
-        </div>
-        <div>
-          <div style="width:100px;">传感器编号：</div>
-          <div></div>
-        </div>
-        <div>
-          <div style="width:100px;">状态：</div>
-          <div></div>
+        <div v-for="(item, index) in sensortype.basicList" :key="index">
+          <div style="width:100px;">{{item.paramNameCh}}</div>
+          <div>{{item.paramNameEn}}</div>
         </div>
       </div>
+      <div v-if="sensortype.basicList.length == 0" class="dialog-empty">无</div>
       <div class="dialog-title"><span></span>定值</div>
       <div class="dialog-item">
-        <div>
-          <div style="width:100px;"></div>
-          <div></div>
-        </div>
-        <div>
-          <div style="width:100px;"></div>
-          <div></div>
+        <div v-for="(item, index) in sensortype.constantList" :key="index">
+          <div style="width:100px;">{{item.paramNameCh}}</div>
+          <div>{{item.paramNameEn}}</div>
         </div>
       </div>
-      <div class="dialog-empty">无</div>
+      <div v-if="sensortype.constantList.length == 0" class="dialog-empty">无</div>
       <div class="dialog-title"><span></span>测量值</div>
       <div class="dialog-item">
-        <div>
-          <div style="width:100px;"></div>
-          <div></div>
-        </div>
-        <div>
-          <div style="width:100px;"></div>
-          <div></div>
+        <div v-for="(item, index) in sensortype.observedList" :key="index">
+          <div style="width:100px;">{{item.paramNameCh}}</div>
+          <div>{{item.paramNameEn}}</div>
         </div>
       </div>
-      <div class="dialog-empty">无</div>
+      <div v-if="sensortype.observedList.length == 0" class="dialog-empty">无</div>
       <div class="dialog-title"><span></span>状态值</div>
       <div class="dialog-item">
-        <div>
-          <div style="width:100px;"></div>
-          <div></div>
-        </div>
-        <div>
-          <div style="width:100px;"></div>
-          <div></div>
+        <div v-for="(item, index) in sensortype.statusList" :key="index">
+          <div style="width:100px;">{{item.paramNameCh}}</div>
+          <div>{{item.paramNameEn}}</div>
         </div>
       </div>
-      <div class="dialog-empty">无</div>
+      <div v-if="sensortype.statusList.length == 0" class="dialog-empty">无</div>
       <span slot="footer" class="dialog-footer notable">
         <el-button type="primary" @click="edit">修 改</el-button>
         <el-button class="cancel" @click="dele">删除</el-button>
@@ -150,17 +135,20 @@ export default {
   data () {
     return {
       currentPage: 1,
-      tableData: [
-        {name: '石家庄220kV子龙站(GIS)', url: '192.168.0.111',unitType: '汇聚节点',sensorTypeCode: '509275', sensorTypeName: '温度传感器', nodeCode: '12313265465',supplier: '英锐祺',sensorTypeStatus: 1,alarm: 1,location: '保险柜',alarmnum: 1,createTime: '2019-3-9'}
-      ],
+      tableData: [],
       total: 0,
       pageSize: 10,
-      name: '',
       height: null,
       keyword: '',
-      code: '',
+      status: '',
       id: '',
-      DialogVisible: false
+      DialogVisible: false,
+      sensortype: {
+        basicList: [],
+        constantList: [],
+        observedList: [],
+        statusList: []
+      }
     }
   },
   methods: {
@@ -175,11 +163,26 @@ export default {
       this.getData()
     },
     edit () {
-      this.$router.push({path: '/site/add-sensor', name: 'addPointSensor', params: {id: this.id}})
+      this.$router.push({path: '/preception/add', name: 'addSensor', query: {id: this.id}})
     },
     showdetail (id) {
       this.DialogVisible = true
       this.id = id
+      this.getDetail()
+    },
+    getDetail () {
+      mylib.axios({
+        url: '/app/sensormeta/detailmeta',
+        type: 'get',
+        params: {
+          id: this.id
+        },
+        done (res) {
+          if (res.code === 0) {
+            this.sensortype = res.sensortype
+          }
+        }
+      }, this)
     },
     dele () {
       this.$confirm('此操作将删除该条信息, 是否继续?', '提示', {
@@ -189,7 +192,7 @@ export default {
         type: 'warning'
       }).then(() => {
         mylib.axios({
-          url: '/app/sensortype/delete',
+          url: '/app/sensormeta/deleteBatch',
           type: 'post',
           params: {
             id: this.id
@@ -200,6 +203,7 @@ export default {
                 type: 'success',
                 message: '删除成功!'
               })
+              this.DialogVisible = false
               this.getData()
             } else {
               this.$message({
@@ -223,7 +227,8 @@ export default {
         params: {
           page: this.currentPage,
           limit: this.pageSize,
-          sensorName: this.name
+          sensorTypeName: this.keyword,
+          status: this.status
         },
         done (res) {
           if (res.code === 0) {
@@ -242,7 +247,7 @@ export default {
   },
   created () {
     this.height = document.documentElement.clientHeight - 250
-    // this.getData()
+    this.getData()
   },
   mounted () {
 
@@ -290,5 +295,6 @@ export default {
     font-size:14px;
     color:#000;
     opacity: 0.85;
+    margin-top:10px;
   }
 </style>

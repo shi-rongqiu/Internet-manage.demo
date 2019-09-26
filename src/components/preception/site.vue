@@ -147,17 +147,12 @@ export default {
       currentPage: 1,
       pageSize: 10,
       total: 0,
-      pointList: [
-        {name: '石家庄220kV子龙站(GIS)', url: '192.168.0.111',unitType: '汇聚节点',code: '509275', sensorTypeName: '温度传感器', nodeCode: '12313265465',supplier: '英锐祺',status: 1,alarm: 1,location: '保险柜',alarmnum: 1,createTime: '2019-3-9'},
-        {name: '保定110kV下河西站(AIS)', url: '192.168.0.112',unitType: '汇聚节点',code: '509275', sensorTypeName: '温度传感器', nodeCode: '12313265465',supplier: '英锐祺',status: 1,alarm: 1,location: '保险柜',alarmnum: 1,createTime: '2019-3-9'}
-      ],
+      pointList: [],
       name: '',
       code: '',
-      action: 'http://localhost:8081/api/app/agsNode/leader',
       nodeName: '',
       nodeIP: '',
       nodeCode: '',
-      supplier: '',
       id: '',
       status: '',
       height: null
@@ -165,14 +160,6 @@ export default {
   },
   methods: {
     jump (row) {
-      // axios['post']('http://192.168.0.111/app/log',)
-      //   .then ((response) => {
-      //     if (response.data.code === 0) {
-      //       window.open('http://' + row.url)
-      //     } else {
-      //       this.$message.error(response.data.msg)
-      //     }
-      //   })
       mylib.axios({
         url: '/app/log',
         type: 'post',
@@ -198,7 +185,6 @@ export default {
       this.nodeName = ''
       this.nodeIP = ''
       this.nodeCode = ''
-      this.supplier = ''
       this.status = ''
       this.id = ''
     },
@@ -252,16 +238,10 @@ export default {
         })
       })
     },
-    upload () {
-      if (this.activeIndex === '1') {
-      } else if (this.activeIndex === '2') {
-      } else {
-        this.getPoint()
-      }
-    },
     getPoint (type) {
       mylib.axios({
         url: '/app/acsnode/list',
+        type: 'post',
         params: {
           page: this.currentPage,
           limit: this.pageSize,
@@ -269,10 +249,14 @@ export default {
           code: this.code
         },
         done (res) {
-          this.pointList = res.rows
-          this.total = res.total
-          if (type === '1') {
-            this.$message.success('刷新成功')
+          if (res.code === 0) {
+            this.pointList = res.rows
+            this.total = res.total
+            if (type === '1') {
+              this.$message.success('刷新成功')
+            }
+          } else {
+            this.$message(res.msg)
           }
         }
       }, this)
@@ -304,6 +288,9 @@ export default {
             code: this.nodeCode,
             status: this.status
           },
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8"
+          },
           done (res) {
             if (res.code === 0) {
               this.$message.success('修改成功！')
@@ -321,6 +308,9 @@ export default {
             url: this.nodeIP,
             code: this.nodeCode,
             status: this.status
+          },
+          headers: {
+            "Content-Type": "application/json;charset=UTF-8"
           },
           done (res) {
             if (res.code === 0) {
@@ -349,7 +339,7 @@ export default {
   },
   created () {
     this.height = document.documentElement.clientHeight - 290
-    // this.getPoint()
+    this.getPoint()
   },
   mounted () {
 

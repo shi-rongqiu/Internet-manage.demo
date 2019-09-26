@@ -9,24 +9,24 @@
       <div class="pop-content">
         <div>
           <div class="pop-item-top">
-            <div class="pop-item-top-title padding-style"><img src="../../assets/img/tile.png" alt="">石家庄220kV子龙站(GIS)</div>
+            <div class="pop-item-top-title padding-style"><img src="../../assets/img/tile.png" alt="">{{acsnode.name}}</div>
             <div class="pop-item-top-context padding-style">
-              <div>ID号：1513531435</div>
-              <div>地址：xxxxxx</div>
-              <div>电网名称：xxxx</div>
+              <div>ID号：{{acsnode.code}}</div>
+              <div>地址：{{acsnode.addr}}</div>
+              <div>电网名称：{{acsnode.manager}}</div>
             </div>
           </div>
           <div class="pop-item-center padding-style" style="margin-top:4%;">
             <span>电压等级</span><span>110KV</span>
           </div>
           <div class="pop-item-center padding-style">
-            <span>电力设备总数</span><span>11</span>
+            <span>电力设备总数</span><span>{{middle.DEVICENUM}}</span>
           </div>
           <div class="pop-item-center padding-style">
-            <span>传感器总数</span><span>20</span>
+            <span>传感器总数</span><span>{{middle.SENSORNUM}}</span>
           </div>
           <div class="pop-item-center padding-style">
-            <span>近一个月告警数量</span><span>30</span>
+            <span>近一个月告警数量</span><span>{{middle.ALARMNUM}}</span>
           </div>
           <div style="margin-top:4%;" class="pop-item-bottom padding-style">
             <div class="pop-item-icon"><img src="../../assets/img/warn-icon.svg" alt=""></div>
@@ -79,7 +79,12 @@ export default {
   data () {
     return {
       myChart: null,
-      isOpen: false
+      isOpen: false,
+      pointList: [],
+      code: '',
+      acsnode: {},
+      below: {},
+      middle: {}
     }
   },
   methods: {
@@ -91,8 +96,11 @@ export default {
         title : {
           x:'center'
         },
-        tooltip : {
-          trigger: 'item'
+        tooltip: {
+          padding: 0,
+          backgroundColor: 'transparent',
+          trigger: 'item',
+          formatter: "{a} <br/>{b} : {c}"
         },
         legend: {
           orient: 'vertical',
@@ -108,7 +116,7 @@ export default {
         //   calculable : true
         // },
         toolbox: {
-          show: true,
+          show: false,
           orient : 'vertical',
           x: 'right',
           y: 'center',
@@ -140,25 +148,58 @@ export default {
               borderWidth: '1'
             },
             data:[
-              {name:'石家庄', selected:true, value: 1231,
-                itemStyle: {
-                color: '#ff0000'
-                }
-              }
+              {name:'石家庄', value: '1231', selected:true}
             ]
           }
         ]
       }
+    },
+    getInfor () {
+      mylib.axios({
+        url: '/app/actual/pandect',
+        type: 'post',
+        params: {
+          acsnodeCode: this.code
+        },
+        done (res) {
+          if (res.code === 0) {
+            this.acsnode = res.acsnode
+            this.below = res.below
+            this.middle = res.middle
+          } else {
+            this.$message(res.msg)
+          }
+        }
+      }, this)
+    },
+    getPoint () {
+      mylib.axios({
+        url: '/app/acsnode/list',
+        type: 'post',
+        params: {
+          status: 1
+        },
+        done (res) {
+          if (res.code === 0) {
+            this.pointList = res.rows
+            this.code = res.rows[0].code
+            this.getInfor()
+          } else {
+            this.$message(res.msg)
+          }
+        }
+      }, this)
     }
   },
   mounted () {
-
+    this.getPoint()
   },
   created() {
     this.getSensor()
   }
 }
 </script>
+
 <style scoped>
   .chart{
     width:650px;
