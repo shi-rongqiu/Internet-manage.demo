@@ -4,32 +4,33 @@
     <div class="content">
       <div>
         <div class="item-left">
-          <img src="../../assets/arithmetic/shenhe-detail.png" v-if="value == 1" alt="">
-          <img src="../../assets/arithmetic/online-detail.png" v-if="value == 2" alt="">
-          <img src="../../assets/arithmetic/under-detail.png" v-if="value == 3" alt="">
+          <img v-if="appMaster.iconPath" :src="appMaster.iconPath" alt="">
+          <img src="../../assets/arithmetic/shenhe-detail.png" v-if="appMaster.status == 0 && !appMaster.iconPath" alt="">
+          <img src="../../assets/arithmetic/online-detail.png" v-if="appMaster.status == 1 && !appMaster.iconPath" alt="">
+          <img src="../../assets/arithmetic/under-detail.png" v-if="appMaster.status == 2 && !appMaster.iconPath" alt="">
         </div>
         <div class="item-right">
-          <el-button class="cancel">
+          <el-button class="cancel" @click="dele">
             <span class="btn">
               <img src="../../assets/arithmetic/detele-icon.png" alt="">
             </span>删除
           </el-button>
-          <el-button @click="edit" class="cancel" v-if="value == 1 || value == 3">
+          <el-button @click="edit" class="cancel" v-if="appMaster.status == 0 || appMaster.status == 2">
             <span class="btn">
               <img src="../../assets/arithmetic/edit-icon.png" alt="">
             </span>编辑
           </el-button>
-          <el-button type="primary" v-if="value == 1 || value == 3">
+          <el-button type="primary" @click="" v-if="appMaster.status == 0 || appMaster.status == 2">
             <span class="btn">
               <img src="../../assets/arithmetic/online-icon.png" alt="">
             </span>上架
           </el-button>
-          <el-button @click="upgrade" type="primary" v-if="value == 2">
+          <el-button @click="upgrade" type="primary" v-if="appMaster.status == 1">
             <span class="btn">
               <img src="../../assets/arithmetic/level.png" alt="">
             </span>升级
           </el-button>
-          <el-button type="primary" v-if="value == 2">
+          <el-button type="primary" v-if="appMaster.status == 1">
             <span class="btn">
               <img src="../../assets/arithmetic/download-icon.png" alt="">
             </span>下架
@@ -37,22 +38,18 @@
         </div>
         <div class="item-center">
           <div>
-            <div class="title">应用名称：</div>
-            <div>版本号：</div>
-            <div>版本大小：</div>
-            <div>厂家名称：</div>
-            <div>应用说明：</div>
+            <div class="title">应用名称：{{appMaster.name}}</div>
+            <div>版本号：{{appMaster.version}}</div>
+            <div>版本大小：{{appMaster.filesize}}</div>
+            <div>厂家名称：{{appMaster.supplier}}</div>
+            <div>应用说明：{{appMaster.profile}}</div>
           </div>
           <div>
             <div class="title">更新内容</div>
-            <div>版本号：</div>
-            <div>版本号：</div>
-            <div>版本号：</div>
-            <div>版本号：</div>
-            <div>版本号：</div>
+            <div>{{appMaster.mark}}</div>
           </div>
           <div>
-            <div><span class="title">附件:</span> <img src="../../assets/arithmetic/fujian-icon.png" alt=""></div>
+            <div><span class="title">附件:</span> <img style="margin-right:10px;" src="../../assets/arithmetic/fujian-icon.png" alt="">{{appMaster.filename}}</div>
           </div>
         </div>
       </div>
@@ -63,35 +60,35 @@
       center
       :visible.sync="editVisible">
       <div class="dialog-container">
-        <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+        <el-form :model="appMaster" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
           <el-form-item label="应用名称：">
-            <div style="height:40px;line-height:40px;">算法</div>
+            <div style="height:40px;line-height:40px;">{{appMaster.name}}</div>
           </el-form-item>
-          <el-form-item label="版本号：" prop="code">
-            <el-input v-model="ruleForm.code" style="width:70%;float:left;"></el-input>
+          <el-form-item label="版本号：" prop="version">
+            <el-input v-model="appMaster.version" style="width:70%;float:left;margin-top:5px;"></el-input>
             <span class="right-tip right">*必填项</span>
           </el-form-item>
           <el-form-item label="厂家名称：" prop="supplier">
-            <el-input v-model="ruleForm.supplier" style="width:70%;float:left;"></el-input>
+            <el-input v-model="appMaster.supplier" style="width:70%;float:left;margin-top:5px;"></el-input>
             <span class="right-tip right">*必填项</span>
           </el-form-item>
-          <el-form-item label="更新内容：" prop="explain">
-            <el-input type="textarea" :rows="3" style="width:70%;" v-model="ruleForm.explain"></el-input>
+          <el-form-item label="更新内容：" prop="profile">
+            <el-input type="textarea" :rows="3" style="width:70%;margin-top:5px;" v-model="appMaster.profile"></el-input>
           </el-form-item>
-          <el-form-item label="上传附件：">
+          <el-form-item label="上传附件：" class="add-content">
             <el-upload
               class="upload-demo"
-              action="https://jsonplaceholder.typicode.com/posts/"
+              :action="action"
               :on-remove="handleRemove"
               :before-upload="beforeUpload"
-              multiple
+              :on-success="handleSuccess"
               :file-list="fileList">
-              <el-button size="small" style="color:#4553d1;border-color:#4553d1;padding:5px 16px;font-size:14px;">
-              <span style="margin-right:5px;">
-                <img src="../../assets/arithmetic/upload-icon.png" alt="">
-              </span>上传文件
+              <el-button size="small" style="color:#4553d1;border-color:#4553d1;padding:5px 16px;font-size:14px;" v-if="!uploadFiles">
+                <span style="margin-right:5px;">
+                  <img src="../../assets/arithmetic/upload-icon.png" alt="">
+                </span>上传文件
               </el-button>
-              <span class="right-tip">*必须上传相关附件</span>
+              <span class="right-tip" v-if="!uploadFiles">*必须上传相关附件</span>
             </el-upload>
           </el-form-item>
           <el-form-item>
@@ -123,7 +120,6 @@
               action="https://jsonplaceholder.typicode.com/posts/"
               :on-remove="handleRemove1"
               :before-upload="beforeUpload1"
-              multiple
               :file-list="fileList1">
               <el-button size="small" style="color:#4553d1;border-color:#4553d1;padding:5px 16px;font-size:14px;">
               <span style="margin-right:5px;">
@@ -147,18 +143,19 @@
 import mylib from '../../mylib'
 export default {
   name: 'detail',
-  props: ['value'],
+  props: ['id'],
   data () {
     return {
       editVisible: false,
       levelVisible: false,
-      ruleForm: {
-        code: '',
+      action: mylib.URL + '/app/master/upload',
+      appMaster: {
+        version: '',
         supplier: '',
-        explain: ''
+        profile: ''
       },
       rules: {
-        code: [
+        version: [
           { required: true, message: '请输入版本号', trigger: 'blur' }
         ],
         supplier: [
@@ -166,6 +163,7 @@ export default {
         ]
       },
       fileList: [],
+      uploadFiles: '',
       ruleForm1: {
         code: '',
         supplier: '',
@@ -188,12 +186,44 @@ export default {
     },
     edit () {
       this.editVisible = true
+      this.fileList.push({
+        name: this.appMaster.filename
+      })
     },
     upgrade () {
       this.levelVisible = true
     },
-    handleRemove(file, fileList) {
-      console.log(file, fileList)
+    dele () {
+      this.$confirm('应用删除后将无法恢复，是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        cancelButtonClass: 'cancel',
+        type: 'warning'
+      }).then(() => {
+        mylib.axios({
+          url: '/app/master/delete',
+          type: 'post',
+          params: {
+            id: this.id
+          },
+          done (res) {
+            if (res.code === 0) {
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              })
+              this.$router.push('/arithmetic')
+            } else {
+              this.$message.error(res.msg)
+            }
+          }
+        }, this)
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     },
     beforeUpload(file) {
       const isLt2M = file.size / 1024 / 1024 < 200
@@ -203,12 +233,40 @@ export default {
       }
       return isLt2M
     },
+    handleSuccess (file, fileList) {
+      this.uploadFiles = fileList.name
+    },
+    handleRemove(file, fileList) {
+      this.uploadFiles = ''
+    },
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!')
+          mylib.axios({
+            url: '/app/master/update',
+            type: 'put',
+            params: {
+              id: this.id,
+              name: this.appMaster.name,
+              version: this.appMaster.version,
+              supplier: this.appMaster.supplier,
+              filename: this.uploadFiles,
+              profile: this.appMaster.profile
+            },
+            headers: {
+              "Content-Type": "application/json;charset=UTF-8"
+            },
+            done (res) {
+              if (res.code === 0) {
+                this.$message.success('修改成功')
+                this.editVisible = false
+                this.getInfor()
+              } else {
+                this.$message.error(res.msg)
+              }
+            }
+          }, this)
         } else {
-          console.log('error submit!!')
           return false
         }
       })
@@ -232,17 +290,30 @@ export default {
         if (valid) {
           alert('submit!')
         } else {
-          console.log('error submit!!')
           return false
         }
       })
     },
     resetForm1() {
       this.levelVisible = false
+    },
+    getInfor () {
+      mylib.axios({
+        url: '/app/master/info/' + this.id,
+        type: 'get',
+        done (res) {
+          if (res.code === 0) {
+            this.appMaster = res.appMaster
+            this.uploadFiles = this.appMaster.filename
+          } else {
+            this.$message.error(res.msg)
+          }
+        }
+      }, this)
     }
   },
   created () {
-
+    this.getInfor()
   }
 }
 </script>

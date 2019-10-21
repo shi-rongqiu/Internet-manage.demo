@@ -192,6 +192,10 @@ export default {
       this.title = '修改'
       this.id = id
       this.DialogVisible = true
+      this.nodeName = ''
+      this.nodeIP = ''
+      this.nodeCode = ''
+      this.status = ''
       this.getData()
     },
     search () {

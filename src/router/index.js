@@ -112,7 +112,7 @@ export default new Router({
           component: Arithmetic
         },
         {
-          path: '/arithmetic/detail/:value',
+          path: '/arithmetic/detail/:id',
           name: 'detail',
           component: Detail,
           props: true

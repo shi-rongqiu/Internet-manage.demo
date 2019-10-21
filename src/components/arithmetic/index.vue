@@ -2,23 +2,15 @@
   <div class="container back">
     <div class="header">第三方应用</div>
     <div class="content">
-      <div class="content-item" @click="enterDetail('1')">
+      <div class="content-item" v-for="(item, index) in list" :key="index" @click="enterDetail(item.id)">
         <div>
+<!--          <img v-if="item.iconPath" :src="item.iconPath" alt="">-->
+<!--          <img src="../../assets/arithmetic/shenhe.png" v-if="item.status == 0 && !item.iconPath" alt="">-->
+<!--          <img src="../../assets/arithmetic/online.png" v-if="item.status == 1 && !item.iconPath" alt="">-->
+<!--          <img src="../../assets/arithmetic/underline.png" v-if="item.status == 2 && !item.iconPath" alt="">-->
           <img src="../../assets/arithmetic/shenhe.png" alt="">
         </div>
-        <div>局放算法</div>
-      </div>
-      <div class="content-item" @click="enterDetail('2')">
-        <div>
-          <img src="../../assets/arithmetic/online.png" alt="">
-        </div>
-        <div>油色谱算法</div>
-      </div>
-      <div class="content-item" @click="enterDetail('3')">
-        <div>
-          <img src="../../assets/arithmetic/underline.png" alt="">
-        </div>
-        <div>避雷器算法</div>
+        <div>{{item.name}}</div>
       </div>
       <div class="content-item">
         <div @click="add">
@@ -30,22 +22,37 @@
 </template>
 
 <script>
-// import mylib from '../mylib'
+import mylib from '../../mylib'
 export default {
   name: 'home',
   data () {
     return {
+      list: []
     }
   },
   methods: {
     add () {
       this.$router.push('/arithmetic/add')
     },
-    enterDetail (value) {
-      this.$router.push('/arithmetic/detail/' + value)
+    enterDetail (id) {
+      this.$router.push('/arithmetic/detail/' + id)
+    },
+    initList () {
+      mylib.axios({
+        url: '/app/master/list',
+        type: 'post',
+        params: {
+        },
+        done (res) {
+          if (res.code === 0) {
+            this.list = res.rows
+          }
+        }
+      }, this)
     }
   },
   created () {
+    this.initList()
   }
 }
 </script>

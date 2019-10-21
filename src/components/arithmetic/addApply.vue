@@ -4,28 +4,28 @@
     <div class="content">
       <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
         <el-form-item label="应用名称：" prop="name">
-          <el-input v-model="ruleForm.name" style="width:70%;float:left;"></el-input>
+          <el-input v-model="ruleForm.name" style="width:70%;float:left;margin-top:5px;"></el-input>
           <span class="right-tip right">*必填项</span>
         </el-form-item>
         <el-form-item label="版本号：" prop="code">
-          <el-input v-model="ruleForm.code" style="width:70%;float:left;"></el-input>
+          <el-input v-model="ruleForm.code" style="width:70%;float:left;margin-top:5px;"></el-input>
           <span class="right-tip right">*必填项</span>
         </el-form-item>
         <el-form-item label="厂家名称：" prop="supplier">
-          <el-input v-model="ruleForm.supplier" style="width:70%;float:left;"></el-input>
+          <el-input v-model="ruleForm.supplier" style="width:70%;float:left;margin-top:5px;"></el-input>
           <span class="right-tip right">*必填项</span>
         </el-form-item>
         <el-form-item label="版本大小：" prop="size">
-          <el-input v-model="ruleForm.size" style="width:70%;"></el-input>
+          <el-input v-model="ruleForm.size" style="width:70%;margin-top:5px;"></el-input>
         </el-form-item>
         <el-form-item label="应用说明：" prop="explain">
-          <el-input type="textarea" :rows="3" style="width:70%;" v-model="ruleForm.explain"></el-input>
+          <el-input type="textarea" :rows="3" style="width:70%;margin-top:5px;" v-model="ruleForm.explain"></el-input>
         </el-form-item>
         <el-form-item label="应用图标：">
           <el-upload
             style="float:left;"
             class="avatar-uploader"
-            action="https://jsonplaceholder.typicode.com/posts/"
+            :action="action"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload">
@@ -40,17 +40,17 @@
         <el-form-item label="上传附件：" class="add-content">
           <el-upload
             class="upload-demo"
-            action="https://jsonplaceholder.typicode.com/posts/"
+            :action="action1"
             :on-remove="handleRemove"
             :before-upload="beforeUpload"
-            multiple
+            :on-success="handleSuccess"
             :file-list="fileList">
-            <el-button size="small" style="color:#4553d1;border-color:#4553d1;padding:5px 16px;font-size:14px;">
+            <el-button v-if="uploadFiles == ''" size="small" style="color:#4553d1;border-color:#4553d1;padding:5px 16px;font-size:14px;margin-top:5px;">
               <span style="margin-right:5px;">
                 <img src="../../assets/arithmetic/upload-icon.png" alt="">
               </span>上传文件
             </el-button>
-            <span class="right-tip">*必须上传相关附件</span>
+            <span class="right-tip" v-if="uploadFiles == ''">*必须上传相关附件</span>
           </el-upload>
         </el-form-item>
         <el-form-item>
@@ -63,7 +63,7 @@
 </template>
 
 <script>
-// import mylib from '../mylib'
+import mylib from '../../mylib'
 export default {
   name: 'addApply',
   data () {
@@ -75,6 +75,8 @@ export default {
         size: '',
         explain: ''
       },
+      action: mylib.URL + '/app/master/upload',
+      action1: mylib.URL + '/app/master/upload',
       rules: {
         name: [
           { required: true, message: '请输入应用名称', trigger: 'blur' }
@@ -87,24 +89,23 @@ export default {
         ]
       },
       imageUrl: '',
-      fileList: [{name: 'food.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}, {name: 'food2.jpeg', url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}],
-      tip: ''
+      image: '',
+      fileList: [],
+      uploadFiles: ''
     }
   },
   methods: {
     handleAvatarSuccess(res, file) {
+      this.image = res.url
       this.imageUrl = URL.createObjectURL(file.raw)
     },
     beforeAvatarUpload(file) {
       const isLt2M = file.size / 1024 / 1024 < 2
 
       if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 2MB!')
+        this.$message.error('上传图标大小不能超过 2MB!')
       }
       return isLt2M
-    },
-    handleRemove(file, fileList) {
-      console.log(file, fileList)
     },
     beforeUpload(file) {
       const isLt2M = file.size / 1024 / 1024 < 200
@@ -114,12 +115,40 @@ export default {
       }
       return isLt2M
     },
+    handleSuccess (file, fileList) {
+      this.uploadFiles = fileList.name
+    },
+    handleRemove(file, fileList) {
+      this.uploadFiles = ''
+    },
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!')
+          mylib.axios({
+            url: '/app/master/save',
+            type: 'post',
+            params: {
+              version: this.ruleForm.code,
+              name: this.ruleForm.name,
+              filesize: this.ruleForm.size,
+              supplier: this.ruleForm.supplier,
+              iconPath: this.image,
+              filename: this.uploadFiles,
+              profile: this.ruleForm.explain
+            },
+            headers: {
+              "Content-Type": "application/json;charset=UTF-8"
+            },
+            done (res) {
+              if (res.code === 0) {
+                this.$message.success('添加成功')
+                this.$router.push('/arithmetic')
+              } else {
+                this.$message.error(res.msg)
+              }
+            }
+          }, this)
         } else {
-          console.log('error submit!!')
           return false
         }
       })

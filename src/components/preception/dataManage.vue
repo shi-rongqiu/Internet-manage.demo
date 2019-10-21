@@ -228,7 +228,7 @@ export default {
           page: this.currentPage,
           limit: this.pageSize,
           sensorTypeName: this.keyword,
-          status: this.status
+          sensorTypeStatus: this.status
         },
         done (res) {
           if (res.code === 0) {

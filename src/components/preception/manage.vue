@@ -14,7 +14,7 @@
         </div>
         <div>
           <span class="top-img"><img src="../../assets/img/point-icon.png" alt=""></span>
-          节点数
+          站点数
           <span class="total-data" style="margin-left:8px;">{{agsNodenum}}</span>
         </div>
       </div>
@@ -42,28 +42,28 @@
               label="序号">
             </el-table-column>
             <el-table-column
-              prop="sensorCode"
+              prop="SENSORCODE"
               align="center"
               label="编号">
             </el-table-column>
             <el-table-column
-              prop="deviceName"
+              prop="DEVICENAME"
               align="center"
               label="安装设备">
             </el-table-column>
             <el-table-column
-              prop="location"
+              prop="LOCATION"
               align="center"
               label="安装位置">
             </el-table-column>
             <el-table-column
-              prop="isOnline"
+              prop="ISONLINE"
               align="center"
               width="60"
               label="状态">
               <template slot-scope="scope">
-                <span v-if="scope.row.isOnline == 1">在线</span>
-                <span style="color:#ffa000;" v-if="scope.row.isOnline == 0">离线</span>
+                <span v-if="scope.row.ISONLINE == 1">在线</span>
+                <span style="color:#ffa000;" v-if="scope.row.ISONLINE == 0">离线</span>
               </template>
             </el-table-column>
           </el-table>
@@ -95,18 +95,7 @@ export default {
       currentPage: 1,
       pageSize: 10,
       total: 0,
-      sensorList: [
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',sensorUnitType: 'IRW',sensorCode: '509275', location: '保险柜', isOnline: 1},
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',sensorUnitType: 'IRW',sensorCode: '509276', location: '保险柜', isOnline: 0},
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',sensorUnitType: 'IRW',sensorCode: '509286', location: '保险柜', isOnline: 1},
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',sensorUnitType: 'IRW',sensorCode: '509273', location: '保险柜', isOnline: 0},
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',sensorUnitType: 'IRW',sensorCode: '509277', location: '保险柜', isOnline: 1},
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',sensorUnitType: 'IRW',sensorCode: '509279', location: '保险柜', isOnline: 0},
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',sensorUnitType: 'IRW',sensorCode: '509210', location: '保险柜', isOnline: 1},
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',sensorUnitType: 'IRW',sensorCode: '509220', location: '保险柜', isOnline: 0},
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',sensorUnitType: 'IRW',sensorCode: '509233', location: '保险柜', isOnline: 1},
-        {name: '石家庄220kV子龙站(GIS)', deviceName: '10v开关',sensorUnitType: 'IRW',sensorCode: '509245', location: '保险柜', isOnline: 0}
-      ],
+      sensorList: [],
       deviceNum: '',
       sensorNum: '',
       sensorOnlineNum: '',
@@ -122,11 +111,11 @@ export default {
     },
     getSensor () {
       mylib.axios({
-        url: '/app/sensor/list',
+        url: '/app/visual/topologyDetails',
         type: 'post',
         params: {
-          sensorType: this.type,
-          nodeCode: this.sensorCode,
+          sensortype: this.type,
+          nodecode: this.sensorCode,
           page: this.currentPage,
           limit: this.pageSize
         },
@@ -175,7 +164,7 @@ export default {
                   }
                   bl.children.forEach((el) => {
                     if (!num) {
-                      el.name = el.SENSORTYPENAME + ' ' + el.NUM + '/' + 0
+                      el.name = el.SENSORTYPENAME + ' ' + el.ZSNUM + '/' + el.ZXNUM
                     }
                     el.itemStyle = {
                       color: '#0069ac'
@@ -189,7 +178,7 @@ export default {
                       color: '#ed9b12'
                     }
                     this.type = data.children[indexOne].children[indexValue].children[0].SENSORTYPE
-                    // this.sensorCode = al.children[indexValue].children[0].nodeCode
+                    this.sensorCode = data.children[indexOne].children[indexValue].children[0].NODECODE
                   }
                 }
               })
@@ -203,7 +192,7 @@ export default {
           color: '#ed9b12'
         }
       }
-      if (this.sensorCode) {
+      if (this.type) {
         this.getSensor()
       }
     },
@@ -222,9 +211,10 @@ export default {
       }
     },
     clickFun (params) {
+      this.currentPage = 1
       var index = params.data.level
       this.type = params.data.SENSORTYPE
-      this.sensorCode = params.data.nodeCode
+      this.sensorCode = params.data.NODECODE
       this.changeTree(this.data[0],index)
       this.initTree()
     },
@@ -286,10 +276,10 @@ export default {
         type: 'get',
         done (res) {
           if (res.code === 0) {
-            this.deviceNum = res.deviceNum
-            this.sensorNum = res.sensorNum
-            this.sensorOnlineNum = res.sensorOnlineNum
-            this.agsNodenum = res.agsNodenum
+            this.deviceNum = res.tatol[0].DEVICENUM
+            this.sensorNum = res.tatol[0].SENSORNUM
+            this.sensorOnlineNum = res.tatol[0].SENSORONLINENUM
+            this.agsNodenum = res.rows.length
             var arr = [{
               name: '平台',
               children: res.rows
@@ -308,37 +298,6 @@ export default {
   },
   mounted () {
     this.getData()
-    // this.data = [{
-    //   "name": "平台",
-    //   "children": [
-    //     {
-    //       "name": "石家庄220kV子龙站(GIS)",
-    //       "children": [
-    //         {
-    //           "name": "汇聚节点",
-    //           "children": [
-    //             {"name": "温度传感器", "value": 10, sensorType: '温度传感器', nodeCode: '123'}
-    //           ]
-    //         }
-    //       ]
-    //     },
-    //     {
-    //       "name": "保定110kV下河西站(AIS)",
-    //       "children": [
-    //         {
-    //           "name": "汇聚节点",
-    //           "children": [
-    //             {"name": "温度传感器", "value": 10, sensorType: '温度传感器', nodeCode: '124'}
-    //           ]
-    //         }
-    //       ]
-    //     }
-    //   ]
-    // }]
-    // this.data[0].level = 0
-    // this.initData(this.data[0], '0')
-    // this.changeTree(this.data[0])
-    // this.initTree()
   },
   created () {
   }

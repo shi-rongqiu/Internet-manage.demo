@@ -100,10 +100,10 @@
             <el-table-column
               label="操作">
               <template slot-scope="scope">
-                <el-button type="text" @click="edit(scope.row.id)">
+                <el-button type="text" @click="edit(scope.row.ID)">
                   修改
                 </el-button>
-                <el-button type="text" @click="del(scope.row.id)">
+                <el-button type="text" @click="del(scope.row.ID)">
                   删除
                 </el-button>
               </template>
@@ -146,10 +146,6 @@
             <el-table-column
               prop="LOCATION"
               label="安装位置">
-            </el-table-column>
-            <el-table-column
-              prop="MARK"
-              label="备注">
             </el-table-column>
           </el-table>
         </el-tab-pane>
@@ -314,20 +310,22 @@ export default {
     edit (id) {
       this.title = '修改'
       this.deviceId = id
+      this.deviceName = ''
+      this.deviceCode = ''
+      this.deviceType = ''
+      this.typeCode = ''
+      this.site = ''
       this.DialogVisible1 = true
       mylib.axios({
-        url: '/app/sub/get',
+        url: '/app/sub/info/' + id,
         type: 'get',
-        params: {
-          id: id
-        },
         done (res) {
           if (res.code === 0) {
-            this.deviceName = res.data.deviceName
-            this.deviceCode = res.data.deviceCode
-            this.deviceType = res.data.typeName
-            this.typeCode = res.data.typeCode
-            this.site = res.data.node
+            this.deviceName = res.device.devicename
+            this.deviceCode = res.device.devicecode
+            this.deviceType = res.device.devicetypename
+            this.typeCode = res.device.devicetypecode
+            this.site = res.device.acsnodecode
           } else {
             this.$message(res.msg)
           }

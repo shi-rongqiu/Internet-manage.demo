@@ -8,18 +8,18 @@
       <div>
         时间：<el-date-picker
         v-model="startTime"
-        type="datetime"
-        value-format="yyyy-MM-dd HH:mm"
+        type="date"
+        value-format="yyyy-MM-dd"
         @change="handleTime"
-        placeholder="选择日期时间">
+        placeholder="选择日期">
       </el-date-picker>
         至
         <el-date-picker
           v-model="endTime"
-          type="datetime"
-          value-format="yyyy-MM-dd HH:mm"
+          type="date"
+          value-format="yyyy-MM-dd"
           @change="handleTime"
-          placeholder="选择日期时间">
+          placeholder="选择日期">
         </el-date-picker>
         <el-button type="primary" @click="search" class="btn">搜索</el-button>
       </div>
@@ -61,9 +61,6 @@ export default {
           deviceCode: this.id,
           startTime: this.startTime,
           endTime: this.endTime
-        },
-        headers: {
-          "Content-Type": "application/json;charset=UTF-8"
         },
         type: 'post',
         done (res) {
